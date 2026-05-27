@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: iot_datalake_local
+    ports:
+      - "9000:9000"      # API (S3a)
+      - "9001:9001"      # Web Console (http://localhost:9001)
+    environment:
+      MINIO_ROOT_USER: azure_admin
+      MINIO_ROOT_PASSWORD: azure_password_123
+    command: server /data --console-address ":9001"

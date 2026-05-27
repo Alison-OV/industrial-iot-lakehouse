@@ -1,0 +1,9 @@
+# Virtual Environments
+venv/
+.venv/
+
+# Private Environment Variables
+.env
+
+# Ignore Local data files
+data/

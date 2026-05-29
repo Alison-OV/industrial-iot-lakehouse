@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -52,9 +55,9 @@ jobs:
         LOCAL_GOLD_FAILURES_PATH: file:///${{ github.workspace }}/data/test_delta/gold_failures
         SPARK_LOCAL_DIRS: /tmp/spark-test
       run: |
-        # Creamos carpetas temporales necesarias para que Spark no falle al escribir
+        # Crear directorios temporales requeridos en el contenedor Linux de GitHub
         mkdir -p tests/fixtures
         mkdir -p data/test_delta
         
-        # Ejecutar la suite de pruebas unitarias
+        # Ejecutar los tests con las variables ya cargadas en la sesión
         pytest tests/

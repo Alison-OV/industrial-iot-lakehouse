@@ -1,26 +1,30 @@
-import pytest
-from pyspark.sql import SparkSession
 from datetime import datetime
+from pyspark.sql import SparkSession
 from src.silver.telemetry_silver import clean_telemetry_data
 
 def test_clean_telemetry_data_deduplication(spark_session: SparkSession):
-    # Generate mock data with duplicate records for the same device_id and row_id but different timestamps
     schema = (
-        "UDI INT, `Product ID` STRING, Type STRING, `Air temperature [K]` DOUBLE, "
-        "`Process temperature [K]` DOUBLE, `Rotational speed [rpm]` INT, `Torque [Nm]` DOUBLE, "
-        "`Tool wear [min]` INT, `Machine failure` INT, _ingested_at TIMESTAMP"
+        "UDI INT, Product_ID STRING, Type STRING, Air_temperature_K DOUBLE, "
+        "Process_temperature_K DOUBLE, Rotational_speed_rpm INT, Torque_Nm DOUBLE, "
+        "Tool_wear_min INT, Machine_failure INT, _ingested_at TIMESTAMP"
     )
-    
+
     mock_data = [
         (1, "DEV-A", "M", 300.1, 310.2, 1500, 40.0, 5, 0, datetime(2026, 5, 25, 12, 0, 0)),
-        (1, "DEV-A", "M", 300.1, 310.2, 1500, 40.0, 5, 0, datetime(2026, 5, 25, 12, 10, 0)) # Más reciente
+        (1, "DEV-A", "M", 300.1, 310.2, 1500, 40.0, 5, 0, datetime(2026, 5, 25, 12, 10, 0)) 
     ]
-    
+
     df_raw = spark_session.createDataFrame(mock_data, schema)
-    
-    # Execute the cleaning function
+
     df_result = clean_telemetry_data(df_raw)
+
+    results = df_result.collect()
+
+
+    assert len(results) == 1
+
+    assert results[0]["_ingested_at"] == datetime(2026, 5, 25, 12, 10, 0)
     
-    # Assert that the window removed the old record and preserved the most recent one
-    assert df_result.count() == 1
-    assert df_result.select("air_temperature_k").first()["air_temperature_k"] == 300.1
+
+    assert "device_id" in df_result.columns
+    assert "air_temperature_k" in df_result.columns

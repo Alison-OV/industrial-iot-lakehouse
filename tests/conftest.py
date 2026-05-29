@@ -3,10 +3,6 @@ from pyspark.sql import SparkSession
 
 @pytest.fixture(scope="session")
 def spark_session():
-    """
-    Provee una sesión de Spark optimizada y configurada con Delta Lake
-    para toda la suite de pruebas unitarias.
-    """
     spark = SparkSession.builder \
         .appName("IndustrialIoTLakehouse-Test-Suite") \
         .master("local[*]") \
@@ -19,5 +15,4 @@ def spark_session():
         
     yield spark
     
-    # Teardown seguro: Detener la JVM al finalizar todos los tests
     spark.stop()

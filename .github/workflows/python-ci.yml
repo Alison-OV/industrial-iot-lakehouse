@@ -39,5 +39,22 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Run unit tests with PyTest
+      env:
+        ENV: TEST
+        STORAGE_ENDPOINT: http://localhost:9000
+        STORAGE_ACCESS_KEY: mock_user
+        STORAGE_SECRET_KEY: mock_password
+        LOCAL_LANDING_PYTHON: tests/fixtures/mock_predictive_maintenance.csv
+        LOCAL_LANDING_SPARK: file:///${{ github.workspace }}/tests/fixtures/mock_predictive_maintenance.csv
+        LOCAL_BRONZE_PATH: file:///${{ github.workspace }}/data/test_delta/bronze
+        LOCAL_SILVER_PATH: file:///${{ github.workspace }}/data/test_delta/silver
+        LOCAL_GOLD_HEALTH_PATH: file:///${{ github.workspace }}/data/test_delta/gold_health
+        LOCAL_GOLD_FAILURES_PATH: file:///${{ github.workspace }}/data/test_delta/gold_failures
+        SPARK_LOCAL_DIRS: /tmp/spark-test
       run: |
+        # Creamos carpetas temporales necesarias para que Spark no falle al escribir
+        mkdir -p tests/fixtures
+        mkdir -p data/test_delta
+        
+        # Ejecutar la suite de pruebas unitarias
         pytest tests/
